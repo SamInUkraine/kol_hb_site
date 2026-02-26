@@ -106,7 +106,7 @@
     </div>
 
     <div id="s5" class="screen">
-        <h2 style="font-size: 1.2rem; margin: 5px;">catch good grades</h2>
+        <h2 style="font-size: 1.2rem; margin: 5px;">task added: catch good grades</h2>
         <div id="gpa-wrap"><div id="gpa-bar" style="left:0;"></div></div>
         <div id="gpa-val" style="font-size: 1.1rem; font-weight: bold;">GPA: 2.0</div>
         <canvas id="gameCanvas"></canvas>
@@ -131,7 +131,6 @@
     <audio id="searchAudio" src="searching.mp3" loop></audio>
     <audio id="failAudio" src="fail.mp3"></audio>
     <audio id="successAudio" src="success.mp3"></audio>
-    <audio id="omgAudio" src="omg.mp3"></audio> 
 
     <script>
         let state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false, gameActive: false };
@@ -196,7 +195,6 @@
                         setTimeout(() => {
                             document.getElementById('searchAudio').pause();
                             document.getElementById('successAudio').play();
-                            document.getElementById('omgAudio').play();
                             document.getElementById('glow-label').style.display = 'none';
                             document.getElementById('detected').style.display = 'block';
                             document.getElementById('glow-img').src = 'friend_photo.jpg'; 
