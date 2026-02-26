@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Pookie's Ultimate Experience</title>
+    <style>
+        body, html { 
+            margin: 0; padding: 0; 
+            width: 100%; height: 100%; 
+            background: white; 
+            font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; 
+            overflow: hidden; 
+            text-align: center; 
+        }
+
+        .screen { 
+            display: none; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+            padding-top: 80px; 
+            width: 100%; 
+            height: 100vh; 
+            box-sizing: border-box;
+            position: relative; 
+        }
+
+        .active { display: flex; }
+
+        /* Прогресс-бар */
+        .progress-container { width: 400px; height: 40px; border: 4px solid black; margin-top: 20px; }
+        #loading-bar { width: 0%; height: 100%; background: #00ff00; transition: width 0.1s linear; }
+
+        /* Тексты */
+        .red-text { color: red; font-size: 5rem; font-weight: bold; animation: shake 0.1s infinite; margin: 20px; }
+        .green-text { color: #00ff00; font-size: 4rem; text-shadow: 2px 2px black; }
+        .big-yahu-text { font-size: 6rem; color: red; position: absolute; top: 15%; z-index: 100; animation: shake 0.05s infinite; }
+        
+        @keyframes shake {
+            0% { transform: translate(2px, 2px) rotate(0deg); }
+            50% { transform: translate(-2px, -3px) rotate(-1deg); }
+            100% { transform: translate(1px, 2px) rotate(1deg); }
+        }
+
+        canvas { background: #fff; border: 5px solid #000; cursor: none; margin-top: 10px; }
+        
+        #gpa-wrap { width: 70%; height: 30px; border: 4px solid #000; position: relative; margin-bottom: 5px; overflow: visible; }
+        #gpa-bar { width: 16.6%; height: 100%; background: red; transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); position: absolute; }
+
+        .falling-asset { position: absolute; z-index: 99; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="s1" class="screen active">
+        <img src="twin_peaks_dance.gif" width="450">
+        <h2 style="font-size: 2.5rem;">Let's rock</h2>
+        <div class="progress-container"><div id="loading-bar"></div></div>
+    </div>
+
+    <div id="s2" class="screen">
+        <img src="emoji_dance.gif" width="450">
+        <h1 style="font-size: 4rem;">happy 16th birthday!</h1>
+    </div>
+
+    <div id="s3" class="screen">
+        <img id="status-img" src="image_620d14.jpg" width="400">
+        <h2 id="status-text" style="font-size: 2rem;">Searching for achievements...</h2>
+        <h1 id="not-found" class="red-text" style="display:none;">NOT FOUND</h1>
+    </div>
+
+    <div id="s4" class="screen">
+        <img id="glow-img" src="image_620c58.jpg" width="350">
+        <h2 id="glow-label" style="font-size: 2rem;">searching for glow up...</h2>
+        <h1 id="detected" class="green-text" style="display:none;">DETECTED</h1>
+    </div>
+
+    <div id="s5" class="screen">
+        <h2 style="font-size: 1.8rem; margin: 5px;">task added: catch good grades</h2>
+        <div id="gpa-wrap"><div id="gpa-bar" style="left:0;"></div></div>
+        <div id="gpa-val" style="font-size: 1.3rem; font-weight: bold;">GPA: 2.0</div>
+        <canvas id="gameCanvas"></canvas>
+    </div>
+
+    <div id="s6" class="screen">
+        <div style="position: relative; margin-top: 40px;">
+            <img src="image_620931.png" width="350">
+            <img src="image_620c58.jpg" width="220" style="position: absolute; bottom: -40px; left: 65px;">
+        </div>
+        <h1 style="font-size: 4rem; margin-top: 50px;">well done</h1>
+    </div>
+
+    <div id="s7" class="screen">
+        <h1 style="font-size: 3.5rem;">Happy birthday pookie.<br>I wish you all the best</h1>
+        <img src="aliens.jpg" width="350"> </div>
+
+    <audio id="skylerAudio" src="skyler.mp3"></audio>
+    <audio id="boostedAudio" src="happy_birthday_boosted.mp3" loop></audio>
+    <audio id="havaAudio" src="hava_nagila.mp3" loop></audio>
+    <audio id="finalAudio" src="dum_dee_dum.mp3"></audio>
+    
+    <audio id="searchAudio" src="searching.mp3" loop></audio>
+    <audio id="failAudio" src="fail.mp3"></audio>
+    <audio id="successAudio" src="success.mp3"></audio>
+
+    <script>
+        let state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false };
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 500; canvas.height = 450;
+
+        const player = { x: 210, y: 360, w: 80, h: 80, img: new Image() };
+        player.img.src = 'image_620c76.png';
+        
+        let objects = [];
+        let flagDropped = false;
+        let rainInterval;
+
+        function switchScreen(from, to) {
+            document.getElementById(from).classList.remove('active');
+            document.getElementById(to).classList.add('active');
+        }
+
+        // Загрузка
+        let prg = 0;
+        const loadInt = setInterval(() => {
+            prg += 0.25; 
+            document.getElementById('loading-bar').style.width = prg + '%';
+            if(prg >= 100) {
+                clearInterval(loadInt);
+                startExperience();
+            }
+        }, 50);
+
+        function startExperience() {
+            switchScreen('s1', 's2');
+            document.getElementById('skylerAudio').play();
+            
+            setTimeout(() => {
+                document.getElementById('skylerAudio').pause();
+                switchScreen('s2', 's3');
+                // ВКЛЮЧАЕМ ЗВУК ПОИСКА
+                document.getElementById('searchAudio').play();
+                
+                setTimeout(() => {
+                    // ЗУБАТЫЙ ГРУСТНЫЙ + FAIL SOUND
+                    document.getElementById('searchAudio').pause();
+                    document.getElementById('failAudio').play();
+                    document.getElementById('status-img').src = 'image_620c98.jpg';
+                    document.getElementById('not-found').style.display = 'block';
+                    document.getElementById('status-text').style.display = 'none';
+                    
+                    setTimeout(() => {
+                        switchScreen('s3', 's4'); 
+                        // ОПЯТЬ ЗВУК ПОИСКА
+                        document.getElementById('searchAudio').currentTime = 0;
+                        document.getElementById('searchAudio').play();
+
+                        setTimeout(() => {
+                            // GLOW UP НАЙДЕН + SUCCESS SOUND
+                            document.getElementById('searchAudio').pause();
+                            document.getElementById('successAudio').play();
+                            document.getElementById('glow-label').style.display = 'none';
+                            document.getElementById('detected').style.display = 'block';
+                            document.getElementById('glow-img').src = 'friend_photo.jpg'; 
+
+                            setTimeout(() => {
+                                switchScreen('s4', 's5');
+                                document.getElementById('boostedAudio').play();
+                                gameLoop();
+                            }, 4500); 
+                        }, 4500);
+                    }, 4500);
+                }, 4500);
+            }, 7500); 
+        }
+
+        // --- ИГРОВАЯ ЛОГИКА ---
+        function gameLoop() {
+            if (state.isOver) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(player.img, player.x, player.y, player.w, player.h);
+
+            objects.forEach((obj, i) => {
+                obj.y += 5;
+                if(obj.type === 'grade') {
+                    ctx.fillStyle = obj.val >= 10 ? '#00ff00' : (obj.val >= 7 ? '#ffd700' : '#ff0000');
+                    ctx.font = "bold 30px 'Comic Sans MS'";
+                    ctx.fillText(obj.val, obj.x, obj.y);
+                } else {
+                    const flagImg = new Image(); flagImg.src = 'israel.webp';
+                    ctx.drawImage(flagImg, obj.x, obj.y, 60, 45);
+                }
+
+                if(obj.y > player.y && obj.y < player.y + player.h && obj.x > player.x - 20 && obj.x < player.x + player.w) {
+                    if(obj.type === 'grade') {
+                        state.grades.push(obj.val);
+                        const sum = state.grades.reduce((a,b) => a+b, 0);
+                        state.gpa = (sum / state.grades.length).toFixed(1);
+                        updateGPA();
+                    } else { winGame(); }
+                    objects.splice(i, 1);
+                }
+                
+                if(obj.y > 500) {
+                    if(obj.type === 'israel') { loseGame(); }
+                    objects.splice(i, 1);
+                }
+            });
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateGPA() {
+            const bar = document.getElementById('gpa-bar');
+            const valTxt = document.getElementById('gpa-val');
+            let percentage = (state.gpa / 12) * 100;
+            bar.style.width = Math.min(percentage, 100) + '%';
+            bar.style.background = state.gpa >= 10 ? '#00ff00' : (state.gpa >= 7 ? '#ffd700' : '#ff0000');
+            valTxt.innerText = "GPA: " + state.gpa;
+        }
+
+        function winGame() {
+            state.isOver = true;
+            document.getElementById('boostedAudio').pause();
+            document.getElementById('havaAudio').play();
+            document.getElementById('gpa-bar').style.width = '10000%';
+            document.getElementById('gpa-val').innerText = "GPA: 100000";
+            showBigYahu("BIG YAHU IS SATISFIED", "israel.webp");
+            setTimeout(() => {
+                stopRain();
+                switchScreen('s5', 's6');
+                setTimeout(() => {
+                    switchScreen('s6', 's7');
+                    document.getElementById('havaAudio').pause();
+                    document.getElementById('finalAudio').play();
+                }, 6000);
+            }, 8000);
+        }
+
+        function loseGame() {
+            state.isOver = true;
+            const bar = document.getElementById('gpa-bar');
+            bar.style.background = 'red';
+            bar.style.width = '2000px';
+            bar.style.left = '-2000px'; 
+            document.getElementById('gpa-val').innerText = "GPA: -100000";
+            showBigYahu("BIG YAHU IS ANGRY", "big_yahu.webp");
+            setTimeout(() => {
+                stopRain();
+                resetMiniGame();
+            }, 5000);
+        }
+
+        function showBigYahu(msg, asset) {
+            const txt = document.createElement('div');
+            txt.className = 'big-yahu-text';
+            txt.id = 'yahu-title';
+            txt.innerText = msg;
+            document.getElementById('s5').appendChild(txt);
+
+            rainInterval = setInterval(() => {
+                const f = document.createElement('img');
+                f.src = asset;
+                f.className = 'falling-asset';
+                f.style.left = Math.random() * 100 + 'vw';
+                f.style.top = '-150px';
+                f.style.width = (Math.random() * 150 + 50) + 'px';
+                f.style.transition = 'top 2s linear';
+                document.body.appendChild(f);
+                setTimeout(() => f.style.top = '120vh', 10);
+                setTimeout(() => f.remove(), 2500);
+            }, 150);
+        }
+
+        function stopRain() {
+            clearInterval(rainInterval);
+            document.querySelectorAll('.falling-asset').forEach(el => el.remove());
+            const title = document.getElementById('yahu-title');
+            if(title) title.remove();
+        }
+
+        function resetMiniGame() {
+            state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false };
+            flagDropped = false;
+            objects = [];
+            const bar = document.getElementById('gpa-bar');
+            bar.style.left = '0';
+            bar.style.width = '16.6%';
+            updateGPA();
+            gameLoop();
+        }
+
+        setInterval(() => { if(!state.isOver) spawnObject(); }, 700);
+
+        function spawnObject() {
+            let type = 'grade';
+            let val = Math.floor(Math.random() * 11) + 2;
+            if (state.gpa >= 10 && !flagDropped) {
+                type = 'israel';
+                flagDropped = true;
+            }
+            objects.push({ x: Math.random() * 450, y: -50, val: val, type: type });
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            let rect = canvas.getBoundingClientRect();
+            player.x = e.clientX - rect.left - player.w/2;
+        });
+    </script>
+</body>
+</html>
