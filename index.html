@@ -13,6 +13,17 @@
             text-align: center; 
         }
 
+        /* Экран разблокировки звука */
+        #audio-unlocker {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; z-index: 1000; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center;
+        }
+        #start-btn {
+            padding: 20px 50px; font-size: 2rem; background: #00ff00;
+            border: 5px solid black; cursor: pointer; font-family: inherit;
+        }
+
         .screen { 
             display: none; 
             flex-direction: column; 
@@ -27,11 +38,9 @@
 
         .active { display: flex; }
 
-        /* Прогресс-бар */
         .progress-container { width: 400px; height: 40px; border: 4px solid black; margin-top: 20px; }
         #loading-bar { width: 0%; height: 100%; background: #00ff00; transition: width 0.1s linear; }
 
-        /* Тексты */
         .red-text { color: red; font-size: 5rem; font-weight: bold; animation: shake 0.1s infinite; margin: 20px; }
         .green-text { color: #00ff00; font-size: 4rem; text-shadow: 2px 2px black; }
         .big-yahu-text { font-size: 6rem; color: red; position: absolute; top: 15%; z-index: 100; animation: shake 0.05s infinite; }
@@ -52,7 +61,13 @@
 </head>
 <body>
 
-    <div id="s1" class="screen active">
+    <div id="audio-unlocker">
+        <h1>WAIT!</h1>
+        <p>This experience requires audio artifacts.</p>
+        <button id="start-btn">ENTER THE POOKIE-ZONE</button>
+    </div>
+
+    <div id="s1" class="screen">
         <img src="twin_peaks_dance.gif" width="450">
         <h2 style="font-size: 2.5rem;">Let's rock</h2>
         <div class="progress-container"><div id="loading-bar"></div></div>
@@ -85,26 +100,25 @@
     <div id="s6" class="screen">
         <div style="position: relative; margin-top: 40px;">
             <img src="image_620931.png" width="350">
-            <img src="image_620c58.jpg" width="220" style="position: absolute; bottom: -40px; left: 65px;">
         </div>
-        <h1 style="font-size: 4rem; margin-top: 50px;">well done</h1>
+        <h1 style="font-size: 4rem; margin-top: 50px;">well down</h1>
     </div>
 
     <div id="s7" class="screen">
         <h1 style="font-size: 3.5rem;">Happy birthday pookie.<br>I wish you all the best</h1>
-        <img src="aliens.jpg" width="350"> </div>
+        <img src="aliens.jpg" width="350">
+    </div>
 
     <audio id="skylerAudio" src="skyler.mp3"></audio>
     <audio id="boostedAudio" src="happy_birthday_boosted.mp3" loop></audio>
-    <audio id="havaAudio" src="hava_nagila1.mp3" loop></audio>
+    <audio id="havaAudio" src="hava_nagila.mp3" loop></audio>
     <audio id="finalAudio" src="dum_dee_dum.mp3"></audio>
-    
     <audio id="searchAudio" src="searching.mp3" loop></audio>
     <audio id="failAudio" src="fail.mp3"></audio>
     <audio id="successAudio" src="success.mp3"></audio>
 
     <script>
-        let state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false };
+        let state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false, gameActive: false };
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 500; canvas.height = 450;
@@ -115,22 +129,31 @@
         let objects = [];
         let flagDropped = false;
         let rainInterval;
+        let spawnInterval; // Храним таймер тут
+
+        // ФУНКЦИЯ ЗАПУСКА ПОСЛЕ КЛИКА
+        document.getElementById('start-btn').addEventListener('click', () => {
+            document.getElementById('audio-unlocker').style.display = 'none';
+            document.getElementById('s1').classList.add('active');
+            startLoading();
+        });
 
         function switchScreen(from, to) {
             document.getElementById(from).classList.remove('active');
             document.getElementById(to).classList.add('active');
         }
 
-        // Загрузка
-        let prg = 0;
-        const loadInt = setInterval(() => {
-            prg += 0.25; 
-            document.getElementById('loading-bar').style.width = prg + '%';
-            if(prg >= 100) {
-                clearInterval(loadInt);
-                startExperience();
-            }
-        }, 50);
+        function startLoading() {
+            let prg = 0;
+            const loadInt = setInterval(() => {
+                prg += 0.25; 
+                document.getElementById('loading-bar').style.width = prg + '%';
+                if(prg >= 100) {
+                    clearInterval(loadInt);
+                    startExperience();
+                }
+            }, 50);
+        }
 
         function startExperience() {
             switchScreen('s1', 's2');
@@ -139,11 +162,9 @@
             setTimeout(() => {
                 document.getElementById('skylerAudio').pause();
                 switchScreen('s2', 's3');
-                // ВКЛЮЧАЕМ ЗВУК ПОИСКА
                 document.getElementById('searchAudio').play();
                 
                 setTimeout(() => {
-                    // ЗУБАТЫЙ ГРУСТНЫЙ + FAIL SOUND
                     document.getElementById('searchAudio').pause();
                     document.getElementById('failAudio').play();
                     document.getElementById('status-img').src = 'image_620c98.jpg';
@@ -152,12 +173,10 @@
                     
                     setTimeout(() => {
                         switchScreen('s3', 's4'); 
-                        // ОПЯТЬ ЗВУК ПОИСКА
                         document.getElementById('searchAudio').currentTime = 0;
                         document.getElementById('searchAudio').play();
 
                         setTimeout(() => {
-                            // GLOW UP НАЙДЕН + SUCCESS SOUND
                             document.getElementById('searchAudio').pause();
                             document.getElementById('successAudio').play();
                             document.getElementById('glow-label').style.display = 'none';
@@ -167,6 +186,10 @@
                             setTimeout(() => {
                                 switchScreen('s4', 's5');
                                 document.getElementById('boostedAudio').play();
+                                
+                                // ВОТ ТУТ МЫ ЗАПУСКАЕМ ИГРУ И ТАЙМЕРЫ
+                                state.gameActive = true;
+                                spawnInterval = setInterval(spawnObject, 700);
                                 gameLoop();
                             }, 4500); 
                         }, 4500);
@@ -175,9 +198,8 @@
             }, 7500); 
         }
 
-        // --- ИГРОВАЯ ЛОГИКА ---
         function gameLoop() {
-            if (state.isOver) return;
+            if (state.isOver || !state.gameActive) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.drawImage(player.img, player.x, player.y, player.w, player.h);
 
@@ -210,6 +232,17 @@
             requestAnimationFrame(gameLoop);
         }
 
+        function spawnObject() {
+            if (!state.gameActive || state.isOver) return;
+            let type = 'grade';
+            let val = Math.floor(Math.random() * 11) + 2;
+            if (state.gpa >= 10 && !flagDropped) {
+                type = 'israel';
+                flagDropped = true;
+            }
+            objects.push({ x: Math.random() * 450, y: -50, val: val, type: type });
+        }
+
         function updateGPA() {
             const bar = document.getElementById('gpa-bar');
             const valTxt = document.getElementById('gpa-val');
@@ -221,6 +254,7 @@
 
         function winGame() {
             state.isOver = true;
+            clearInterval(spawnInterval); // Стоп спавн
             document.getElementById('boostedAudio').pause();
             document.getElementById('havaAudio').play();
             document.getElementById('gpa-bar').style.width = '10000%';
@@ -239,6 +273,7 @@
 
         function loseGame() {
             state.isOver = true;
+            clearInterval(spawnInterval); // Стоп спавн
             const bar = document.getElementById('gpa-bar');
             bar.style.background = 'red';
             bar.style.width = '2000px';
@@ -280,26 +315,15 @@
         }
 
         function resetMiniGame() {
-            state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false };
+            state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false, gameActive: true };
             flagDropped = false;
             objects = [];
             const bar = document.getElementById('gpa-bar');
             bar.style.left = '0';
             bar.style.width = '16.6%';
             updateGPA();
+            spawnInterval = setInterval(spawnObject, 700); // Снова запускаем спавн
             gameLoop();
-        }
-
-        setInterval(() => { if(!state.isOver) spawnObject(); }, 700);
-
-        function spawnObject() {
-            let type = 'grade';
-            let val = Math.floor(Math.random() * 11) + 2;
-            if (state.gpa >= 10 && !flagDropped) {
-                type = 'israel';
-                flagDropped = true;
-            }
-            objects.push({ x: Math.random() * 450, y: -50, val: val, type: type });
         }
 
         window.addEventListener('mousemove', (e) => {
