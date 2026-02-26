@@ -2,6 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Pookie's Ultimate Experience</title>
     <style>
         body, html { 
@@ -9,19 +10,21 @@
             width: 100%; height: 100%; 
             background: white; 
             font-family: 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif; 
-            overflow: hidden; 
-            text-align: center; 
+            overflow-x: hidden; 
+            text-align: center;
+            touch-action: manipulation; /* Убирает задержку клика на мобилках */
         }
 
-        /* Экран разблокировки звука */
         #audio-unlocker {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white; z-index: 1000; display: flex; 
             flex-direction: column; align-items: center; justify-content: center;
+            padding: 20px; box-sizing: border-box;
         }
         #start-btn {
-            padding: 20px 50px; font-size: 2rem; background: #00ff00;
+            padding: 20px 40px; font-size: 1.5rem; background: #00ff00;
             border: 5px solid black; cursor: pointer; font-family: inherit;
+            width: 90%; max-width: 400px;
         }
 
         .screen { 
@@ -29,7 +32,7 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: flex-start; 
-            padding-top: 80px; 
+            padding-top: 40px; 
             width: 100%; 
             height: 100vh; 
             box-sizing: border-box;
@@ -38,12 +41,15 @@
 
         .active { display: flex; }
 
-        .progress-container { width: 400px; height: 40px; border: 4px solid black; margin-top: 20px; }
+        /* Адаптивные картинки */
+        img { max-width: 90%; height: auto; }
+
+        .progress-container { width: 80%; max-width: 400px; height: 30px; border: 4px solid black; margin-top: 20px; }
         #loading-bar { width: 0%; height: 100%; background: #00ff00; transition: width 0.1s linear; }
 
-        .red-text { color: red; font-size: 5rem; font-weight: bold; animation: shake 0.1s infinite; margin: 20px; }
-        .green-text { color: #00ff00; font-size: 4rem; text-shadow: 2px 2px black; }
-        .big-yahu-text { font-size: 6rem; color: red; position: absolute; top: 15%; z-index: 100; animation: shake 0.05s infinite; }
+        .red-text { color: red; font-size: 3rem; font-weight: bold; animation: shake 0.1s infinite; margin: 10px; }
+        .green-text { color: #00ff00; font-size: 2.5rem; text-shadow: 2px 2px black; }
+        .big-yahu-text { font-size: 3rem; color: red; position: absolute; top: 20%; z-index: 100; animation: shake 0.05s infinite; padding: 0 10px; }
         
         @keyframes shake {
             0% { transform: translate(2px, 2px) rotate(0deg); }
@@ -51,9 +57,17 @@
             100% { transform: translate(1px, 2px) rotate(1deg); }
         }
 
-        canvas { background: #fff; border: 5px solid #000; cursor: none; margin-top: 10px; }
+        /* Игровое поле теперь тянется */
+        canvas { 
+            background: #fff; 
+            border: 5px solid #000; 
+            margin-top: 10px; 
+            max-width: 95%; 
+            height: auto; 
+            touch-action: none; /* Важно: отключает скролл браузера при игре */
+        }
         
-        #gpa-wrap { width: 70%; height: 30px; border: 4px solid #000; position: relative; margin-bottom: 5px; overflow: visible; }
+        #gpa-wrap { width: 85%; height: 25px; border: 4px solid #000; position: relative; margin-bottom: 5px; overflow: visible; }
         #gpa-bar { width: 16.6%; height: 100%; background: red; transition: 0.4s cubic-bezier(0.18, 0.89, 0.32, 1.28); position: absolute; }
 
         .falling-asset { position: absolute; z-index: 99; pointer-events: none; }
@@ -62,49 +76,52 @@
 <body>
 
     <div id="audio-unlocker">
-        <button id="start-btn">PLAYA</button>
+        <h1>WAIT!</h1>
+        <p>This experience requires audio artifacts.</p>
+        <button id="start-btn">ENTER THE POOKIE-ZONE</button>
     </div>
 
     <div id="s1" class="screen">
         <img src="twin_peaks_dance.gif" width="450">
-        <h2 style="font-size: 2.5rem;">Let's rock</h2>
+        <h2>Let's rock</h2>
         <div class="progress-container"><div id="loading-bar"></div></div>
     </div>
 
     <div id="s2" class="screen">
         <img src="emoji_dance.gif" width="450">
-        <h1 style="font-size: 4rem;">happy 16th birthday!</h1>
+        <h1 style="font-size: 2.5rem;">happy 16th birthday!</h1>
     </div>
 
     <div id="s3" class="screen">
         <img id="status-img" src="image_620d14.jpg" width="400">
-        <h2 id="status-text" style="font-size: 2rem;">Searching for achievements...</h2>
+        <h2 id="status-text">Searching for achievements...</h2>
         <h1 id="not-found" class="red-text" style="display:none;">NOT FOUND</h1>
     </div>
 
     <div id="s4" class="screen">
         <img id="glow-img" src="image_620c58.jpg" width="350">
-        <h2 id="glow-label" style="font-size: 2rem;">searching for glow up...</h2>
+        <h2 id="glow-label">searching for glow up...</h2>
         <h1 id="detected" class="green-text" style="display:none;">DETECTED</h1>
     </div>
 
     <div id="s5" class="screen">
-        <h2 style="font-size: 1.8rem; margin: 5px;">task added: catch good grades</h2>
+        <h2 style="font-size: 1.2rem; margin: 5px;">task added: catch good grades</h2>
         <div id="gpa-wrap"><div id="gpa-bar" style="left:0;"></div></div>
-        <div id="gpa-val" style="font-size: 1.3rem; font-weight: bold;">GPA: 2.0</div>
+        <div id="gpa-val" style="font-size: 1.1rem; font-weight: bold;">GPA: 2.0</div>
         <canvas id="gameCanvas"></canvas>
     </div>
 
     <div id="s6" class="screen">
-        <div style="position: relative; margin-top: 40px;">
-            <img src="image_620931.png" width="350">
+        <div style="position: relative; margin-top: 20px;">
+            <img src="image_620931.png" width="300">
+            <img src="image_620c58.jpg" width="180" style="position: absolute; bottom: -30px; left: 50%; transform: translateX(-50%);">
         </div>
-        <h1 style="font-size: 4rem; margin-top: 50px;">well down</h1>
+        <h1 style="font-size: 3rem; margin-top: 50px;">well done</h1>
     </div>
 
     <div id="s7" class="screen">
-        <h1 style="font-size: 3.5rem;">Happy birthday pookie.<br>and they are going to haaaave us</h1>
-        <img src="aliens.jpg" width="350">
+        <h1 style="font-size: 2rem; padding: 0 10px;">Happy birthday pookie.<br>I wish you all the best</h1>
+        <img src="aliens.jpg" width="300">
     </div>
 
     <audio id="skylerAudio" src="skyler.mp3"></audio>
@@ -119,17 +136,18 @@
         let state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false, gameActive: false };
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = 500; canvas.height = 450;
+        
+        // Фиксируем логический размер, CSS растянет его визуально
+        canvas.width = 400; 
+        canvas.height = 500;
 
-        const player = { x: 210, y: 360, w: 80, h: 80, img: new Image() };
+        const player = { x: 160, y: 410, w: 80, h: 80, img: new Image() };
         player.img.src = 'image_620c76.png';
         
         let objects = [];
         let flagDropped = false;
-        let rainInterval;
-        let spawnInterval; // Храним таймер тут
+        let rainInterval, spawnInterval;
 
-        // ФУНКЦИЯ ЗАПУСКА ПОСЛЕ КЛИКА
         document.getElementById('start-btn').addEventListener('click', () => {
             document.getElementById('audio-unlocker').style.display = 'none';
             document.getElementById('s1').classList.add('active');
@@ -144,7 +162,7 @@
         function startLoading() {
             let prg = 0;
             const loadInt = setInterval(() => {
-                prg += 0.25; 
+                prg += 0.5; 
                 document.getElementById('loading-bar').style.width = prg + '%';
                 if(prg >= 100) {
                     clearInterval(loadInt);
@@ -184,8 +202,6 @@
                             setTimeout(() => {
                                 switchScreen('s4', 's5');
                                 document.getElementById('boostedAudio').play();
-                                
-                                // ВОТ ТУТ МЫ ЗАПУСКАЕМ ИГРУ И ТАЙМЕРЫ
                                 state.gameActive = true;
                                 spawnInterval = setInterval(spawnObject, 700);
                                 gameLoop();
@@ -202,14 +218,14 @@
             ctx.drawImage(player.img, player.x, player.y, player.w, player.h);
 
             objects.forEach((obj, i) => {
-                obj.y += 5;
+                obj.y += 4;
                 if(obj.type === 'grade') {
                     ctx.fillStyle = obj.val >= 10 ? '#00ff00' : (obj.val >= 7 ? '#ffd700' : '#ff0000');
-                    ctx.font = "bold 30px 'Comic Sans MS'";
+                    ctx.font = "bold 24px 'Comic Sans MS'";
                     ctx.fillText(obj.val, obj.x, obj.y);
                 } else {
                     const flagImg = new Image(); flagImg.src = 'israel.webp';
-                    ctx.drawImage(flagImg, obj.x, obj.y, 60, 45);
+                    ctx.drawImage(flagImg, obj.x, obj.y, 50, 35);
                 }
 
                 if(obj.y > player.y && obj.y < player.y + player.h && obj.x > player.x - 20 && obj.x < player.x + player.w) {
@@ -222,7 +238,7 @@
                     objects.splice(i, 1);
                 }
                 
-                if(obj.y > 500) {
+                if(obj.y > 550) {
                     if(obj.type === 'israel') { loseGame(); }
                     objects.splice(i, 1);
                 }
@@ -232,14 +248,31 @@
 
         function spawnObject() {
             if (!state.gameActive || state.isOver) return;
-            let type = 'grade';
-            let val = Math.floor(Math.random() * 11) + 2;
-            if (state.gpa >= 10 && !flagDropped) {
-                type = 'israel';
-                flagDropped = true;
-            }
-            objects.push({ x: Math.random() * 450, y: -50, val: val, type: type });
+            let type = 'grade', val = Math.floor(Math.random() * 11) + 2;
+            if (state.gpa >= 10 && !flagDropped) { type = 'israel'; flagDropped = true; }
+            objects.push({ x: Math.random() * (canvas.width - 30), y: -30, val: val, type: type });
         }
+
+        // ОБРАБОТКА ДВИЖЕНИЯ (МЫШЬ + ТАЧ)
+        function handleMove(e) {
+            let clientX;
+            if (e.type === 'touchmove') {
+                clientX = e.touches[0].clientX;
+            } else {
+                clientX = e.clientX;
+            }
+            let rect = canvas.getBoundingClientRect();
+            // Вычисляем позицию с учетом масштабирования канваса
+            let scaleX = canvas.width / rect.width;
+            player.x = (clientX - rect.left) * scaleX - player.w / 2;
+            
+            // Ограничения, чтобы не уходил за края
+            if (player.x < 0) player.x = 0;
+            if (player.x > canvas.width - player.w) player.x = canvas.width - player.w;
+        }
+
+        window.addEventListener('mousemove', handleMove);
+        window.addEventListener('touchmove', handleMove, { passive: false });
 
         function updateGPA() {
             const bar = document.getElementById('gpa-bar');
@@ -252,7 +285,7 @@
 
         function winGame() {
             state.isOver = true;
-            clearInterval(spawnInterval); // Стоп спавн
+            clearInterval(spawnInterval);
             document.getElementById('boostedAudio').pause();
             document.getElementById('havaAudio').play();
             document.getElementById('gpa-bar').style.width = '10000%';
@@ -271,7 +304,7 @@
 
         function loseGame() {
             state.isOver = true;
-            clearInterval(spawnInterval); // Стоп спавн
+            clearInterval(spawnInterval);
             const bar = document.getElementById('gpa-bar');
             bar.style.background = 'red';
             bar.style.width = '2000px';
@@ -290,14 +323,13 @@
             txt.id = 'yahu-title';
             txt.innerText = msg;
             document.getElementById('s5').appendChild(txt);
-
             rainInterval = setInterval(() => {
                 const f = document.createElement('img');
                 f.src = asset;
                 f.className = 'falling-asset';
-                f.style.left = Math.random() * 100 + 'vw';
-                f.style.top = '-150px';
-                f.style.width = (Math.random() * 150 + 50) + 'px';
+                f.style.left = Math.random() * 80 + 'vw';
+                f.style.top = '-100px';
+                f.style.width = (Math.random() * 100 + 50) + 'px';
                 f.style.transition = 'top 2s linear';
                 document.body.appendChild(f);
                 setTimeout(() => f.style.top = '120vh', 10);
@@ -314,20 +346,13 @@
 
         function resetMiniGame() {
             state = { gpa: 2.0, grades: [2, 2], win: false, isOver: false, gameActive: true };
-            flagDropped = false;
-            objects = [];
+            flagDropped = false; objects = [];
             const bar = document.getElementById('gpa-bar');
-            bar.style.left = '0';
-            bar.style.width = '16.6%';
+            bar.style.left = '0'; bar.style.width = '16.6%';
             updateGPA();
-            spawnInterval = setInterval(spawnObject, 700); // Снова запускаем спавн
+            spawnInterval = setInterval(spawnObject, 700);
             gameLoop();
         }
-
-        window.addEventListener('mousemove', (e) => {
-            let rect = canvas.getBoundingClientRect();
-            player.x = e.clientX - rect.left - player.w/2;
-        });
     </script>
 </body>
 </html>
